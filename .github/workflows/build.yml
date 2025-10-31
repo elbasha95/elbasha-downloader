@@ -1,0 +1,48 @@
+name: Build APK
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential libssl-dev libjpeg-dev zlib1g-dev libtiff-dev libfreetype6-dev liblcms2-dev python3-dev python3-pip
+        pip install --upgrade pip
+        pip install buildozer cython
+    
+    - name: Install Java
+      run: |
+        sudo apt-get install -y openjdk-11-jdk
+    
+    - name: Build APK
+      run: |
+        buildozer -f -v android debug
+    
+    - name: Upload APK
+      uses: actions/upload-artifact@v3
+      with:
+        name: elbasha-apk
+        path: bin/elbasha-1.0-debug.apk
+
+    - name: Create Release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: v${{ github.run_number }}
+        release_name: ELBASHA Downloader v${{ github.run_number }}
+        body: |
+          APK automatically built from source
+        draft: false
+        prerelease: false
