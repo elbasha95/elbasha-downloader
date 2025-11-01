@@ -1,33 +1,9 @@
-name: Build APK
+- name: Find APK
+  run: find /home/runner/work/elbasha-downloader/elbasha-downloader -name "*.apk" -type f
 
-on: [push]
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
-    
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y openjdk-11-jdk git
-        pip install buildozer cython kivy
-    
-    - name: Build APK
-      run: |
-        buildozer -f -v android debug || echo "Build attempted"
-    
-    - name: Upload APK
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: elbasha-apk
-        path: bin/
-        retention-days: 7
+- name: Upload APK
+  uses: actions/upload-artifact@v4
+  with:
+    name: elbasha-apk
+    path: |
+      /home/runner/work/elbasha-downloader/elbasha-downloader/.buildozer/android/platform/build*/build/outputs/apk/debug/
