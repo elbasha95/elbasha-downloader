@@ -5,33 +5,40 @@ on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.11'
-    
+
     - name: Install dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y openjdk-11-jdk
         pip install buildozer cython kivy
-    
+
     - name: Build APK
       run: buildozer -f -v android debug
-    
-    - name: Find and copy APK
+
+    - name: Find APK files
+      run: |
+        echo "Finding APK files..."
+        find . -name "*.apk" -type f
+
+    - name: Copy APK to bin directory
       run: |
         mkdir -p bin
-        find /home/runner/work -name "*debug.apk" -exec cp {} bin/ \;
+        find /home/runner/work/elbasha-downloader -name "*.apk" -type f -exec cp {} bin/ \;
+        echo "Files in bin directory:"
         ls -lah bin/
-    
-    - name: Upload Artifacts
+
+    - name: Upload APK to Artifacts
       uses: actions/upload-artifact@v4
       with:
         name: elbasha-apk
-        path: bin/
+        path: bin/*.apk
+        if-no-files-found: warn
         retention-days: 30
